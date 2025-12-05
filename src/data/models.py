@@ -73,7 +73,8 @@ class MetarData(BaseModel):
     # Metadata
     auto: bool = Field(False, description="Automated observation")
     corrected: bool = Field(False, description="Corrected report")
-    remarks: Optional[str] = Field(None, description="Remarks section")
+    remarks: Optional[str] = Field(None, description="Raw remarks section")
+    remarks_data: Optional[dict] = Field(None, description="Decoded remarks data")
     
     # Cache metadata
     cached_at: Optional[datetime] = Field(None, description="When this was cached")
