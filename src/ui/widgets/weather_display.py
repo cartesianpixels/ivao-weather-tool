@@ -249,7 +249,7 @@ class WeatherDisplay(QWidget):
             self._add_remarks_section(metar.remarks)
             
     def _add_remarks_section(self, remarks):
-        """Add decoded remarks section."""
+        """Add remarks section."""
         remarks_group = QGroupBox("Remarks")
         remarks_group.setStyleSheet("""
             QGroupBox {
@@ -269,60 +269,12 @@ class WeatherDisplay(QWidget):
         remarks_layout = QVBoxLayout()
         remarks_layout.setSpacing(8)
         
-        # Station Type
-        if remarks.station_type:
-            remarks_layout.addWidget(QLabel(f"• Station Type: {remarks.station_type}"))
-            
-        # Peak Wind
-        if remarks.peak_wind:
-            pw = remarks.peak_wind
-            text = f"• Peak Wind: {pw.speed} kt from {pw.direction}° at {pw.time}"
-            remarks_layout.addWidget(QLabel(text))
-            
-        # Wind Shift
-        if remarks.wind_shift:
-            ws = remarks.wind_shift
-            text = f"• Wind Shift at {ws.time}"
-            if ws.frontal:
-                text += " (frontal)"
-            remarks_layout.addWidget(QLabel(text))
-            
-        # Visibility
-        if remarks.tower_visibility:
-            remarks_layout.addWidget(QLabel(f"• Tower Visibility: {remarks.tower_visibility}"))
-        if remarks.surface_visibility:
-            remarks_layout.addWidget(QLabel(f"• Surface Visibility: {remarks.surface_visibility}"))
-            
-        # Lightning
-        if remarks.lightning:
-            lt = remarks.lightning
-            text = f"• Lightning: {', '.join(lt.types)}"
-            if lt.distance:
-                text += f" {lt.distance}"
-            if lt.directions:
-                text += f" {', '.join(lt.directions)}"
-            remarks_layout.addWidget(QLabel(text))
-            
-        # Precipitation
-        if remarks.precipitation_begin_end:
-            for precip in remarks.precipitation_begin_end:
-                text = f"• {precip.phenomenon}"
-                if precip.began:
-                    text += f" began {precip.began}"
-                if precip.ended:
-                    text += f" ended {precip.ended}"
-                remarks_layout.addWidget(QLabel(text))
-                
-        # Sea Level Pressure
-        if remarks.sea_level_pressure:
-            remarks_layout.addWidget(QLabel(f"• Sea Level Pressure: {remarks.sea_level_pressure} hPa"))
-            
-        # Plain Language
-        if remarks.plain_language:
-            for remark in remarks.plain_language:
-                label = QLabel(f"• {remark}")
-                label.setWordWrap(True)
-                remarks_layout.addWidget(label)
+        # Display raw remarks text (remarks is a string in the model)
+        if isinstance(remarks, str):
+            label = QLabel(remarks)
+            label.setWordWrap(True)
+            label.setStyleSheet("font-family: 'Courier New', monospace; font-size: 10px;")
+            remarks_layout.addWidget(label)
         
         if remarks_layout.count() > 0:
             remarks_group.setLayout(remarks_layout)
@@ -391,18 +343,13 @@ class WeatherDisplay(QWidget):
             """)
             self.container_layout.addWidget(interp_label)
         
-        # Base Forecast
-        if taf.forecast:
-            self._add_forecast_period("Base Forecast", taf.forecast, is_base=True)
-        
-        # Change Groups
-        if taf.change_groups:
-            for group in taf.change_groups:
-                self._add_forecast_period(
-                    self._get_change_group_title(group),
-                    group,
-                    is_base=False
-                )
+        # Display all forecast periods
+        if taf.periods:
+            for i, period in enumerate(taf.periods):
+                # First period is usually the base forecast
+                is_base = (i == 0 and period.change_indicator is None)
+                title = self._get_period_title(period, is_base)
+                self._add_forecast_period(title, period, is_base=is_base)
                 
     def _add_forecast_period(self, title, forecast, is_base=False):
         """Add a forecast period (base or change group)."""
@@ -432,10 +379,10 @@ class WeatherDisplay(QWidget):
         layout.setSpacing(8)
         
         # Time period
-        if hasattr(forecast, 'time_from') and forecast.time_from:
-            time_text = f"Period: {forecast.time_from.strftime('%d %H:%M')}"
-            if hasattr(forecast, 'time_to') and forecast.time_to:
-                time_text += f" - {forecast.time_to.strftime('%d %H:%M UTC')}"
+        if hasattr(forecast, 'from_time') and forecast.from_time:
+            time_text = f"Period: {forecast.from_time.strftime('%d %H:%M')}"
+            if hasattr(forecast, 'to_time') and forecast.to_time:
+                time_text += f" - {forecast.to_time.strftime('%d %H:%M UTC')}"
             time_label = QLabel(time_text)
             time_label.setStyleSheet("color: #666; font-size: 11px; font-weight: normal;")
             layout.addWidget(time_label)
@@ -451,6 +398,10 @@ class WeatherDisplay(QWidget):
             wind = forecast.wind
             if wind.direction == 0 and wind.speed == 0:
                 wind_text = "Wind: Calm"
+            elif wind.variable or wind.direction is None:
+                wind_text = f"Wind: Variable at {wind.speed} kt"
+                if wind.gust:
+                    wind_text += f" G{wind.gust}"
             else:
                 wind_text = f"Wind: {wind.direction:03d}° at {wind.speed} kt"
                 if wind.gust:
@@ -465,7 +416,17 @@ class WeatherDisplay(QWidget):
         # Weather
         if forecast.weather:
             for wx in forecast.weather:
-                wx_text = f"Weather: {wx.raw}"
+                # Build weather text from components
+                wx_parts = []
+                if wx.intensity:
+                    wx_parts.append(wx.intensity)
+                if wx.descriptor:
+                    wx_parts.append(wx.descriptor)
+                wx_parts.extend(wx.precipitation)
+                wx_parts.extend(wx.obscuration)
+                wx_parts.extend(wx.other)
+                
+                wx_text = f"Weather: {' '.join(wx_parts)}"
                 wx_interp = self.interpreter.interpret_weather_phenomena([wx])
                 if wx_interp:
                     wx_text += f" — {wx_interp}"
@@ -490,17 +451,27 @@ class WeatherDisplay(QWidget):
         group.setLayout(layout)
         self.container_layout.addWidget(group)
         
-    def _get_change_group_title(self, group):
-        """Get title for change group."""
-        if group.change_type == "FM":
-            return f"FROM {group.time_from.strftime('%d %H:%M UTC') if group.time_from else ''}"
-        elif group.change_type == "TEMPO":
+    def _get_period_title(self, period, is_base=False):
+        """Get title for forecast period."""
+        if is_base:
+            return "Base Forecast"
+        
+        if not period.change_indicator:
+            return "Forecast Period"
+        
+        indicator = period.change_indicator
+        
+        if indicator == "FM":
+            return f"FROM {period.from_time.strftime('%d %H:%M UTC') if period.from_time else ''}"
+        elif indicator == "TEMPO":
             return "TEMPORARY"
-        elif group.change_type == "BECMG":
+        elif indicator == "BECMG":
             return "BECOMING"
-        elif group.change_type == "PROB":
-            return f"PROBABILITY {group.probability}%"
-        return group.change_type or "Change"
+        elif indicator.startswith("PROB"):
+            prob = period.probability if period.probability else ""
+            return f"PROBABILITY {prob}%"
+        
+        return indicator or "Change"
         
     def _create_label(self, text, bold=False):
         """Create a styled label."""
