@@ -100,3 +100,6 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 - Weather data provided by FAA Aviation Weather Center
 - Built for the IVAO community
+- **Author**: Abdellah Chaaibi (IVAO VID: 710267)
+- **Contact**: cartesianpixels@gmail.com
+- **License**: MIT License

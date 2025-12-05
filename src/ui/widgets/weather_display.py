@@ -51,7 +51,7 @@ class WeatherDisplay(QWidget):
         font = label.font()
         font.setPointSize(14)
         label.setFont(font)
-        label.setStyleSheet("color: #888;")
+        label.setStyleSheet("opacity: 0.6;")
         
         self.container_layout.addWidget(label)
         
@@ -93,7 +93,7 @@ class WeatherDisplay(QWidget):
         header_layout.addStretch()
         
         time_label = QLabel(metar.observation_time.strftime("%d %H:%M UTC"))
-        time_label.setStyleSheet("font-size: 12px; color: #666;")
+        time_label.setStyleSheet("font-size: 12px; opacity: 0.7;")
         header_layout.addWidget(time_label)
         
         self.container_layout.addWidget(header)
@@ -103,7 +103,7 @@ class WeatherDisplay(QWidget):
         raw_label.setWordWrap(True)
         raw_label.setStyleSheet("""
             font-family: 'Courier New', monospace; 
-            background: #f5f5f5; 
+            background: rgba(33, 150, 243, 0.1); 
             padding: 12px; 
             border-radius: 6px;
             border-left: 4px solid #2196F3;
@@ -118,10 +118,10 @@ class WeatherDisplay(QWidget):
             interp_label.setTextFormat(Qt.TextFormat.RichText)  # Enable HTML rendering
             interp_label.setWordWrap(True)
             interp_label.setStyleSheet("""
-                background: #E3F2FD;
+                background: rgba(33, 150, 243, 0.15);
                 padding: 12px;
                 border-radius: 6px;
-                color: #1565C0;
+                color: #2196F3;
                 font-size: 12px;
                 line-height: 1.5;
             """)
@@ -129,20 +129,7 @@ class WeatherDisplay(QWidget):
         
         # Details Grid
         details_group = QGroupBox("Weather Details")
-        details_group.setStyleSheet("""
-            QGroupBox {
-                font-weight: bold;
-                border: 2px solid #ddd;
-                border-radius: 6px;
-                margin-top: 10px;
-                padding-top: 10px;
-            }
-            QGroupBox::title {
-                subcontrol-origin: margin;
-                left: 10px;
-                padding: 0 5px;
-            }
-        """)
+        # Use theme defaults
         grid = QGridLayout()
         grid.setSpacing(15)
         grid.setColumnStretch(1, 1)
@@ -251,20 +238,7 @@ class WeatherDisplay(QWidget):
     def _add_remarks_section(self, remarks):
         """Add remarks section."""
         remarks_group = QGroupBox("Remarks")
-        remarks_group.setStyleSheet("""
-            QGroupBox {
-                font-weight: bold;
-                border: 2px solid #ddd;
-                border-radius: 6px;
-                margin-top: 10px;
-                padding-top: 10px;
-            }
-            QGroupBox::title {
-                subcontrol-origin: margin;
-                left: 10px;
-                padding: 0 5px;
-            }
-        """)
+        # Use theme defaults
         
         remarks_layout = QVBoxLayout()
         remarks_layout.setSpacing(8)
@@ -286,7 +260,7 @@ class WeatherDisplay(QWidget):
         line = QFrame()
         line.setFrameShape(QFrame.Shape.HLine)
         line.setFrameShadow(QFrame.Shadow.Sunken)
-        line.setStyleSheet("background-color: #ddd; margin: 10px 0;")
+        line.setStyleSheet("opacity: 0.3; margin: 10px 0;")
         self.container_layout.addWidget(line)
         
         # Header
@@ -302,7 +276,7 @@ class WeatherDisplay(QWidget):
         
         if taf.issue_time:
             issue_label = QLabel(f"Issued: {taf.issue_time.strftime('%d %H:%M UTC')}")
-            issue_label.setStyleSheet("font-size: 12px; color: #666;")
+            issue_label.setStyleSheet("font-size: 12px; opacity: 0.7;")
             header_layout.addWidget(issue_label)
         
         self.container_layout.addWidget(header)
@@ -312,7 +286,7 @@ class WeatherDisplay(QWidget):
             valid_label = QLabel(
                 f"Valid: {taf.valid_from.strftime('%d %H:%M')} - {taf.valid_to.strftime('%d %H:%M UTC')}"
             )
-            valid_label.setStyleSheet("font-size: 12px; color: #666; margin-bottom: 10px;")
+            valid_label.setStyleSheet("font-size: 12px; opacity: 0.7; margin-bottom: 10px;")
             self.container_layout.addWidget(valid_label)
         
         # Raw Text
@@ -320,7 +294,7 @@ class WeatherDisplay(QWidget):
         raw_label.setWordWrap(True)
         raw_label.setStyleSheet("""
             font-family: 'Courier New', monospace; 
-            background: #f5f5f5; 
+            background: rgba(255, 152, 0, 0.1); 
             padding: 12px; 
             border-radius: 6px;
             border-left: 4px solid #FF9800;
@@ -334,10 +308,10 @@ class WeatherDisplay(QWidget):
             interp_label = QLabel(interpretation)
             interp_label.setWordWrap(True)
             interp_label.setStyleSheet("""
-                background: #FFF3E0;
+                background: rgba(255, 152, 0, 0.15);
                 padding: 12px;
                 border-radius: 6px;
-                color: #E65100;
+                color: #FF9800;
                 font-size: 12px;
                 line-height: 1.5;
             """)
@@ -356,9 +330,9 @@ class WeatherDisplay(QWidget):
         group = QGroupBox(title)
         
         if is_base:
-            style = "border: 2px solid #4CAF50; background-color: #F1F8F4;"
+            style = "border: 2px solid #4CAF50; background-color: rgba(76, 175, 80, 0.1);"
         else:
-            style = "border: 2px solid #FF9800; background-color: #FFF8F0;"
+            style = "border: 2px solid #FF9800; background-color: rgba(255, 152, 0, 0.1);"
             
         group.setStyleSheet(f"""
             QGroupBox {{
@@ -384,7 +358,7 @@ class WeatherDisplay(QWidget):
             if hasattr(forecast, 'to_time') and forecast.to_time:
                 time_text += f" - {forecast.to_time.strftime('%d %H:%M UTC')}"
             time_label = QLabel(time_text)
-            time_label.setStyleSheet("color: #666; font-size: 11px; font-weight: normal;")
+            time_label.setStyleSheet("opacity: 0.7; font-size: 11px; font-weight: normal;")
             layout.addWidget(time_label)
         
         # Probability

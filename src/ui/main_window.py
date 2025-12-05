@@ -18,13 +18,16 @@ from .weather_fetcher import WeatherFetcher
 from src.domain.metar_decoder import MetarDecoder
 from src.domain.taf_decoder import TafDecoder
 from src.data.models import UserSettings
+from src.ui.theme_manager import ThemeManager
 
 class MainWindow(QMainWindow):
     """Main application window."""
     
-    def __init__(self):
+    def __init__(self, app):
         """Initialize main window."""
         super().__init__()
+        
+        self.app = app  # Store QApplication reference for theme changes
         
         self.setWindowTitle("IVAO Weather Tool")
         self.setMinimumSize(800, 600)
@@ -244,9 +247,15 @@ class MainWindow(QMainWindow):
         if dialog.exec():
             new_settings = dialog.get_settings()
             if new_settings:
+                old_theme = self.user_settings.theme
                 self.user_settings = new_settings
-                self.status_bar.showMessage("Settings saved", 3000)
-                # TODO: Apply settings to UI
+                
+                # Apply theme if changed
+                if new_settings.theme != old_theme:
+                    ThemeManager.apply_theme(self.app, new_settings.theme)
+                    self.status_bar.showMessage(f"Theme changed to {new_settings.theme}", 3000)
+                else:
+                    self.status_bar.showMessage("Settings saved", 3000)
     
     def _toggle_calculator(self):
         """Toggle calculator window visibility."""
