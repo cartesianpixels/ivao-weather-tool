@@ -1,14 +1,16 @@
 # IVAO Weather Tool
 
-A cross-platform Python desktop application for understanding and using aviation weather in online ATC and virtual flight operations, combining live FAA weather data with structured training for IVAO controllers and pilots.
+A cross-platform Python desktop application for understanding and using aviation weather in online ATC and virtual flight operations. It combines live FAA weather data with powerful decoding tools for IVAO controllers and pilots.
 
 ## Features
 
-- **Live Weather Data**: Real-time METAR, TAF, PIREP from FAA/NOAA sources
-- **Offline Mode**: Cached weather data for offline access
-- **Weather Decoding**: Human-readable interpretation of aviation weather
+- **Live Weather Data**: Real-time METAR and TAF from FAA/NOAA sources
+- **Advanced Decoding**: Full decoding of METAR and TAF including complex remarks, change groups, and runway visual ranges
+- **Weather Calculator**: Integrated tools for Density Altitude, Crosswind Component, and Unit Conversions
+- **Manual Decoder**: Decode any raw weather string instantly without searching for an airport
 - **Flight Categories**: Visual VFR/MVFR/IFR/LIFR indicators
-- **Training Module**: Interactive lessons and quizzes for weather interpretation
+- **Offline Mode**: Cached weather data for offline access
+- **Training Module**: Interactive lessons and quizzes (Coming Soon)
 - **Cross-Platform**: Works on Windows, macOS, and Linux
 
 ## Requirements
@@ -18,12 +20,18 @@ A cross-platform Python desktop application for understanding and using aviation
 
 ## Installation
 
+
+### Running the Executable (Windows)
+1. Navigate to the `dist` folder
+2. Double-click `IVAO Weather Tool.exe`
+3. No Python installation required!
+
 ### From Source
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
-cd WX
+git clone https://github.com/cartesianpixels/ivao-weather-tool.git
+cd ivao-weather-tool
 ```
 
 2. Create a virtual environment:
@@ -94,7 +102,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-[To be determined]
+This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## Acknowledgments
 
@@ -102,4 +110,3 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 - Built for the IVAO community
 - **Author**: Abdellah Chaaibi (IVAO VID: 710267)
 - **Contact**: cartesianpixels@gmail.com
-- **License**: MIT License

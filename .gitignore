@@ -57,3 +57,8 @@ dist/
 
 # Logs
 *.log
+
+# Demos and Tests (as requested)
+tests/
+demo_*.py
+test_*.py
